@@ -8,7 +8,7 @@ class Visitor(models.Model):
 
     name = models.CharField(max_length=45)
     email = models.CharField(max_length=45)
-    temperature = models.PositiveIntegerField(default=36.1)
+    temperature = models.FloatField(default=36.1)
     date_visited = models.DateTimeField(auto_now=True)
 
     class Meta:  # pylint: disable=too-few-public-methods

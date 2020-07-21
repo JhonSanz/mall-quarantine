@@ -1,5 +1,6 @@
 """ General visitor api endpoints """
 
+from datetime import datetime
 from cerberus import Validator
 from rest_framework import status
 from rest_framework.response import Response
@@ -16,20 +17,24 @@ class VisitorApi(APIView):
         """
         """
 
+        to_date = lambda s: datetime.strptime(s, '%Y-%m-%d')
         validator = Validator({
             "name": {"required": False, "empty": False, "type": "string"},
-            "email": {"required": False, "empty": False, "type": "string",
-                      "regex": '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'},
-            "temperature": {"required": False, "empty": False, "type": "number"},
+            "email": {
+                "required": False, "empty": False, "type": "string",
+                "regex": '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'},
+            "temperature": {"required": False, "empty": False,
+                            "type": "string"},
             "date_visited": {
-                "required": False, "empty": False, "type": "datetime"}
+                "required": False, "empty": False, "type": "date",
+                "coerce": to_date}
         })
         if not validator.validate(request.GET):
             return Response({
                 "code": "invalid_filtering_params",
                 "detail": "There was an error with your filtering params",
-                "data": v/alidator.errors
-            })
+                "data": validator.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
 
         filters = []
         if request.GET.get("name"):
@@ -39,7 +44,10 @@ class VisitorApi(APIView):
         if request.GET.get("temperature"):
             filters.append(Q(temperature=request.GET.get("temperature")))
         if request.GET.get("date_visited"):
-            filters.append(Q(date_visited=request.GET.get("date_visited")))
+            date_filter = request.GET.get("date_visited").split("-")
+            filters.append(Q(date_visited__year=date_filter[0]))
+            filters.append(Q(date_visited__month=date_filter[1]))
+            filters.append(Q(date_visited__day=date_filter[-1]))
 
         return Response(
             VisitorSerializer(Visitor.objects.filter(
@@ -49,19 +57,20 @@ class VisitorApi(APIView):
     def post(self, request):
         """
         """
-
         validator = Validator({
-            "name": {"required": False, "empty": False, "type": "string"},
-            "email": {"required": False, "empty": False, "type": "string",
-                      "regex": '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'},
-            "temperature": {"required": False, "empty": False, "type": "number"}
+            "name": {"required": True, "empty": False, "type": "string"},
+            "email": {
+                "required": True, "empty": False, "type": "string",
+                "regex": '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'},
+            "temperature": {"required": True, "empty": False,
+                            "type": "number"}
         })
-        if not validator.validate(request.GET):
+        if not validator.validate(request.data):
             return Response({
                 "code": "invalid_body",
                 "detail": "Invalid request data",
                 "data": validator.errors
-            })
-        
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         Visitor.objects.create(**request.data)
         return Response(status=status.HTTP_200_OK)
