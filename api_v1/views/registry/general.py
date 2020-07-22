@@ -55,7 +55,7 @@ class RegistryApi(APIView):
             "mall": mall_instance.first().pk,
             "visitor": visitor_instance.first().pk,
             **request.data})
-        if temperature > 38:
+        if request.data.get("temperature") > 38:
             visitor_instance.update(enabled=False)
             return Response({
                 "code": "dangerous_visitor",
