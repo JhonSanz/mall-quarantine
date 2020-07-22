@@ -1,12 +1,15 @@
 """ """
 
+from datetime import timedelta
 from cerberus import Validator
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from ...serializers.registry import RegistrySerializer
 from ...models.visitor import Visitor
 from ...models.mall import Mall
+from ...models.registry import Registry
 
 
 class RegistryApi(APIView):
@@ -39,6 +42,17 @@ class RegistryApi(APIView):
                          else "mall_not_found"),
                 "detail": "Requested dependency was not found"
             }, status=status.HTTP_404_NOT_FOUND)
+
+        if not visitor_instance.first().enabled:
+            if timezone.now() - Registry.objects.filter(
+                visitor=visitor_instance.first()).order_by(
+                    "-created_at")[0].created_at > timedelta(days=6):
+                visitor_instance.update(enabled=True)
+            else:
+                return Response({
+                    "code": "dangerous_visitor",
+                    "detail": "You are still sick, go home and rest",
+                }, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = RegistrySerializer(data={
             "mall": mall_instance.first().pk,
