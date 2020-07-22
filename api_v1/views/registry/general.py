@@ -41,7 +41,8 @@ class RegistryApi(APIView):
             }, status=status.HTTP_404_NOT_FOUND)
 
         serializer = RegistrySerializer(data={
-            "mall": mall_instance.first(), "visitor": visitor_instance.first(),
+            "mall": mall_instance.first().pk,
+            "visitor": visitor_instance.first().pk,
             **request.data})
         if not serializer.is_valid():
             return Response({
@@ -51,7 +52,8 @@ class RegistryApi(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         instance = serializer.create(validated_data={
-            "mall": mall_instance.first(), "visitor": visitor_instance.first(),
+            "mall": mall_instance.first().pk,
+            "visitor": visitor_instance.first().pk,
             **request.data})
         if temperature > 38:
             visitor_instance.update(enabled=False)

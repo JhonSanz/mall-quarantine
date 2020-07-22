@@ -14,11 +14,7 @@ class Registry(models.Model):
 
     class Meta:  # pylint: disable=too-few-public-methods
         """ Sets human readable name """
-        verbose_name = "Visitante"
-
-    def get_visitor_info(self):
-        """ Returns basic visitor info """
-        return "{} {}°C".format(self.name, self.temperature)
+        verbose_name = "Visita"
 
     def __str__(self):
-        return self.name
+        return "{} -> {}".format(self.visitor.name, self.mall.name)
