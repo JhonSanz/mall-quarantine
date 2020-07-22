@@ -8,7 +8,7 @@ class Registry(models.Model):
     """ Registry model definition """
 
     visitor = models.ForeignKey(Visitor, on_delete=models.CASCADE)
-    mall = models.ForeignKey(Mall, on_delete=models.CASCADE)
+    mall = models.ManyToManyField(Mall)
     temperature = models.FloatField(default=36.1)
     created_at = models.DateTimeField(auto_now=True)
 
