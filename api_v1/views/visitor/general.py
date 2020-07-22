@@ -72,6 +72,7 @@ class VisitorApi(APIView):
                 "data": validator.errors
             }, status=status.HTTP_400_BAD_REQUEST)
 
+        temperature = request.data.pop("temperature")
         serializer = VisitorSerializer(data=request.data)
         if not serializer.is_valid():
             return Response({
@@ -80,13 +81,5 @@ class VisitorApi(APIView):
                 "data": serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        instance = serializer.create(validated_data=request.data)
-        if request.data.get("temperature") > 38:
-            instance.enabled = False
-            instance.save()
-            return Response({
-                "code": "dangerous_visitor",
-                "detail": "You are sick, go home and rest"
-            }, status=status.HTTP_200_OK)
-
+        serializer.create(validated_data=request.data)
         return Response(status=status.HTTP_200_OK)

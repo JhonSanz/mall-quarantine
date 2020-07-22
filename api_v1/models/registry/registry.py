@@ -1,15 +1,16 @@
 """ Contains the visitor model """
 
 from django.db import models
+from ..visitor import Visitor
+from ..mall import Mall
 
+class Registry(models.Model):
+    """ Registry model definition """
 
-class Visitor(models.Model):
-    """ Visitor model definition """
-
-    name = models.CharField(max_length=45)
-    email = models.CharField(max_length=45)
+    visitor = models.ForeignKey(Visitor)
+    mall = models.ForeignKey(Mall)
+    temperature = models.FloatField(default=36.1)
     created_at = models.DateTimeField(auto_now=True)
-    enabled = models.BooleanField(default=True)
 
     class Meta:  # pylint: disable=too-few-public-methods
         """ Sets human readable name """

@@ -13,4 +13,4 @@ class VisitorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Visitor
-        fields = ["pk", "name", "email", "temperature", "date_visited"]
+        fields = ["pk", "name", "email", "created_at"]
