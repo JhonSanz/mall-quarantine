@@ -21,9 +21,7 @@ class VisitorApi(APIView):
             "name": {"required": True, "empty": False, "type": "string"},
             "email": {
                 "required": True, "empty": False, "type": "string",
-                "regex": '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'},
-            "temperature": {"required": True, "empty": False,
-                            "type": "number"}
+                "regex": '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'}
         })
         if not validator.validate(request.data):
             return Response({
@@ -32,7 +30,6 @@ class VisitorApi(APIView):
                 "data": validator.errors
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        temperature = request.data.pop("temperature")
         serializer = VisitorSerializer(data=request.data)
         if not serializer.is_valid():
             return Response({
