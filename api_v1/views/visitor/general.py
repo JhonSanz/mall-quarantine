@@ -17,7 +17,7 @@ class VisitorApi(APIView):
         """
         """
 
-        to_date = lambda s: datetime.strptime(s, '%Y-%m-%d')
+        def to_date(s): return datetime.strptime(s, '%Y-%m-%d')
         validator = Validator({
             "name": {"required": False, "empty": False, "type": "string"},
             "email": {
@@ -72,5 +72,21 @@ class VisitorApi(APIView):
                 "data": validator.errors
             }, status=status.HTTP_400_BAD_REQUEST)
 
-        Visitor.objects.create(**request.data)
+        serializer = VisitorSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({
+                "code": "invalid_body",
+                "detail": "There was and error creating a visitor instance",
+                "data": serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        instance = serializer.create(validated_data=request.data)
+        if request.data.get("temperature") > 38:
+            instance.enabled = False
+            instance.save()
+            return Response({
+                "code": "dangerous_visitor",
+                "detail": "You are sick, go home and rest"
+            }, status=status.HTTP_200_OK)
+
         return Response(status=status.HTTP_200_OK)
